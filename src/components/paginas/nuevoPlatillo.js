@@ -1,8 +1,21 @@
-import React from 'react'
+import React, {useContext} from 'react'
 import {useFormik} from 'formik';
 import * as Yup from 'yup'
+import {FirebaseContext} from '../../firebase';
+
+import { useNavigate } from 'react-router-dom';
 
 const NuevoPlatillo = () => {
+  //context con las operaciones de firebase
+  //use context nos permite compartir daros a travez de componentes sin usar props
+  const {firebase} = useContext(FirebaseContext);
+  //verificar en consola lo siguiente para saber si esta bien configurado Firebase {db: e}
+
+  //console.log(firebase);
+
+  //hook para redireccionar
+  const navigate = useNavigate();
+  
 
   //envio de datos y leer datos
   const formik = useFormik({
@@ -27,11 +40,20 @@ const NuevoPlatillo = () => {
                         .required('La descripción es obligatoria'),
                 
     }),
-    onSubmit: data =>{
-      console.log(data)
+    onSubmit: platillo =>{
+      try {
+      // console.log(platillo)
+       platillo.existencia = true;
+       firebase.db.collection('platillo').add(platillo);
+       // Redireccionar
+       navigate('/menu');
+      } catch (error) {
+        console.log(error);
+      }
+     
     }
 
-  })
+  });
     return (
         <>
         <h1 className ="text-3xl font-light mb-4">Agregar Platillo</h1>
@@ -66,7 +88,6 @@ const NuevoPlatillo = () => {
                    id ="precio"
                    type = "number"
                    placeholder = "$20"
-                   min= "20"
                    value ={formik.values.precio}
                    onChange = {formik.handleChange}
                    onBlur={formik.handleBlur}
